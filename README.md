@@ -3,7 +3,7 @@ KMeansInMapReduce
 
 This project implements K-means clustering algorithm in MapReduce, Hadoop 2.0. The purpose of this project is not to provide an alternative version of K-Means clustering algorithms in Apache Mahout. Instead, this project aims to help people who are not using Mahout, Spark or other Hadoop machine learning libraries to implement K-means in their Hadoop projects. The standard version of K-means is implemented and the mathematics of the algorithm can be found in http://en.wikipedia.org/wiki/K-means_clustering . 
 
-In this project, one map-reduce job is designed for a single k-means iteration. In order to run multiple k-means iterations, I design chained map-reduce jobs: "map 1-> reduce 1-> map 2 -> reduce 2 -> ...... -> map n -> reduce n" by using "JobControl" to schedule the jobs. 
+In this project, one map-reduce job is designed for a single k-means iteration. In order to run multiple k-means iterations, I designed chained map-reduce jobs: "map 1-> reduce 1-> map 2 -> reduce 2 -> ...... -> map n -> reduce n" by using "JobControl" to schedule the jobs. 
 
 The project contains 2 java files. KMeans.java contains the main method and MapReduce jobs. CentroidInitialization.java reads the file contains the centroids coordinates. 
 
@@ -13,5 +13,14 @@ There are 3 arguments need to be provided by the user in the following sequence:
 0.21 0.28 0.5 0 0.14 
 .......
 
+The updated centroids are outputted in the folder "Output0", "Output1", ..... If the user wants to look at the residue information, please edit the codes yourself as we do not provide this information. 
 
+For many algorithms implemented in MapReduce, there are external parameters or data need to pass to map or reduce methods. This can be done in the following steps:
+
+Configuration conf = new Configuration();
+conf.set(key, value);
+...
+Job job = new Job(conf, "jobname");
+
+where parameters are stored in value. In Mapper class or Reducer class, we call the method "setup" to read the parameters and leave them in the memory so that the codes in map method or reduce method can access these parameters.
    
