@@ -17,10 +17,10 @@ The updated centroids are outputted in the folder "Output0", "Output1", ..... If
 
 For many algorithms implemented in MapReduce, there are external parameters or data need to pass to map or reduce methods. This can be done in the following steps:
 
-Configuration conf = new Configuration();
-conf.set(key, value);
+Configuration conf = new Configuration()
+conf.set(key, value)
 ...
-Job job = new Job(conf, "jobname");
+Job job = new Job(conf, "jobname")
 
 where parameters are stored in value. In Mapper class or Reducer class, we call the method "setup" to read the parameters and leave them in the memory so that the codes in map method or reduce method can access these parameters.
    
