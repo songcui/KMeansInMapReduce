@@ -30,7 +30,8 @@ import java.util.*;
 
 public class KMeans extends Configured implements Tool {
 	public static int DIMENSION = 58;
-	/* The dimension of the data points to be clustered */
+	/* The dimension of the data points to be clustered. If the dimension is specified wrongly, this code can
+	automatically correct it. */
 	
 	
 	public static void main(String[] args) throws Exception {
