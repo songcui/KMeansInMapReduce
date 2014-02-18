@@ -13,7 +13,12 @@ There are 3 arguments need to be provided by the user in the following sequence:
 0.21 0.28 0.5 0 0.14 
 .......
 
-The updated centroids are outputted in the folder "Output0", "Output1", ..... If the user wants to look at the residue information, please edit the codes yourself as we do not provide this information. 
+The updated centroids are outputted in the folder "Output0", "Output1", ..... with same format:
+
+0 0.24 0.32 0.02 0.35
+....
+
+If the user wants to look at the residue information, please edit the codes yourself as we do not provide this information. 
 
 For many algorithms implemented in MapReduce, there are external parameters or data need to pass to map or reduce methods. This can be done in the following steps:
 
