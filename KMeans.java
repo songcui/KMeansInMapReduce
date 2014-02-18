@@ -1,4 +1,3 @@
-
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import java.io.IOException;
@@ -13,14 +12,14 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.mapred.jobcontrol.JobControl;           // added import
+import org.apache.hadoop.mapred.jobcontrol.JobControl;           
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;  
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;          //added import
+import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;          
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -31,6 +30,8 @@ import java.util.*;
 
 public class KMeans extends Configured implements Tool {
 	public static int DIMENSION = 58;
+	/* The dimension of the data points to be clustered */
+	
 	
 	public static void main(String[] args) throws Exception {
 	  if (args.length!=3){
@@ -52,7 +53,7 @@ public class KMeans extends Configured implements Tool {
 	  
 	   JobControl control = new JobControl("KMeansMapReduce");
 	   
-	   ControlledJob step0 = new ControlledJob(KmeansMapReduce(args[0], FileDir+"0", args[1]+"/c1.txt"), null);
+	   ControlledJob step0 = new ControlledJob(KmeansMapReduce(args[0], FileDir+"0", args[1]), null);
 	   control.addJob(step0);
 
 	   if (number_of_iteractions>1){
@@ -66,9 +67,17 @@ public class KMeans extends Configured implements Tool {
 			   }
 		   }
 	   }
+	   
+	   /* The codes above in run method schedule chained jobs. Each "KmeansMapReduce" MapReduce job
+	   runs 1 iteraction of K-means clustering. The job dependency needs to be specified so that the next
+	   iteraction only start to run after the current iteraction finishes.*/
+	   
 	   Thread workFlowThread =  new Thread(control, "workflowthread");
 	   workFlowThread.setDaemon(true);
-	   workFlowThread.start();   
+	   workFlowThread.start();  
+	   
+	   /* put the chained MapReduce jobs in a thread and run*/
+	   
 	   return 0;
    }
 
@@ -80,6 +89,9 @@ public class KMeans extends Configured implements Tool {
 		   conf.set(String.valueOf(i), centroid.get(i));
 	   }
 	   conf.set("NumberOfCentroid", String.valueOf(centroid.size()));
+	   
+	   /* The codes above stores the centroids to input to K-means clustering algorithms in the values of 
+	   conf<key, value>. We can read the centroids in the setup method in Mapper class later on.*/
     	
        @SuppressWarnings("deprecation")
        Job job = new Job(conf, "job configuration");
@@ -88,7 +100,7 @@ public class KMeans extends Configured implements Tool {
 	   job.setOutputValueClass(NullWritable.class);
 
 	   job.setMapperClass(KMeansMap.class);
-	   job.setMapOutputKeyClass(IntWritable.class);  // Need to add this line as TextOutputFormat.class is specified.
+	   job.setMapOutputKeyClass(IntWritable.class);  
 	   job.setMapOutputValueClass(Text.class);
 	   job.setReducerClass(KMeansReduce.class);
 
@@ -99,6 +111,8 @@ public class KMeans extends Configured implements Tool {
 	   FileOutputFormat.setOutputPath(job, new Path(outputPath));
 	   
 	   job.waitForCompletion(true);
+	   
+	   /* The codes above specify various formats of the job */ 
 
 	   return job;
    }
@@ -108,15 +122,19 @@ public class KMeans extends Configured implements Tool {
    public static class KMeansMap extends Mapper<LongWritable, Text, IntWritable, Text> {
 	   private HashMap<String, String> centroid_register = new HashMap<String, String> ();
 	   private ArrayList<ArrayList<Double>>centroid_array = new ArrayList<ArrayList<Double>>();
-       private int numberOfDimension;
-       private ArrayList<Double>data_point = new ArrayList <Double>();
+       	   private int numberOfDimension;
+           private ArrayList<Double>data_point = new ArrayList <Double>();
 	   private IntWritable clusterNumber = new IntWritable();
 
 	   
-	   //public void configuration (JobConf jobconf) {
-       public void setup (Context context) throws IOException,
+           public void setup (Context context) throws IOException,
 		InterruptedException {
-    	  String k = "NumberOfCentroid";
+			 	  	
+   	  	/* The setup method reads the centroid data by retrieving the value from conf<key, value>. The
+   	  	centroid data are then left in the memory and the map method can read the centroid data  in order
+   	  	assign the nearest centroid to each data point.*/
+   	  	
+    	          String k = "NumberOfCentroid";
 		  for (int i=0;i<Integer.parseInt(context.getConfiguration().get(k));i++){
 		   centroid_register.put(String.valueOf(i), context.getConfiguration().get(String.valueOf(i)));
 		  }
