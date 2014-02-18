@@ -156,8 +156,13 @@ public class KMeans extends Configured implements Tool {
 	  }	
 		     
    	 @Override
-       public void map(LongWritable key, Text value, Context context)
+         public void map(LongWritable key, Text value, Context context)
               throws IOException, InterruptedException{ 
+              	
+              	/* During the map stage of the job, the Euclidean distance between each data point and each centroid
+              	is calculated. The data point will be assigned to the centroid with the smallest Euclidean distance.
+              	The map method will output the number of the centroid the data point is assignted to and the data point.
+              	*/
 
     	  	for (String element_data: value.toString().split("\\s+")){
     	  		data_point.add(Double.parseDouble(element_data));
@@ -188,14 +193,21 @@ public class KMeans extends Configured implements Tool {
     	  	context.write(clusterNumber, value);
     	  	data_point.clear();
    	 }
-     public void cleanup(javax.naming.Context context) throws IOException, InterruptedException, NamingException{
-     	 context.close();
-    }
+   	 
+     	public void cleanup(javax.naming.Context context) throws IOException, InterruptedException, NamingException{
+     		/* cleanup */
+     	 	context.close();
+    	}
    }
+   
    public static class KMeansReduce extends Reducer<IntWritable, Text, Text, NullWritable> {
 	  @Override
       public void reduce(IntWritable key, Iterable<Text> value, Context context)
               throws IOException, InterruptedException {
+         
+         /* The reducer will calculate the mass center of the data points that assigned to the same cluster. 
+         The reducer will output the mass center as the new centroid for each cluster. */     	
+              	
          Text newCentroid = new Text();
          String newCentroidString = "";
          Double sum[] = new Double[DIMENSION];
@@ -228,6 +240,7 @@ public class KMeans extends Configured implements Tool {
          context.write(newCentroid, NullWritable.get());
    }
     public void cleanup(javax.naming.Context context) throws IOException, InterruptedException, NamingException{
+    	 /* Clean up the reducer*/
      	 context.close();
     }
   	   
