@@ -1,3 +1,7 @@
+
+/* This code reads the intial centroids from a txt file where one centroid is specified in one line. Each dimension
+of a centroid is separated by space. */
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
